@@ -1,64 +1,66 @@
 const mongoose = require("mongoose"),
-{ Schema } = require("mongoose"),
-Subscriber = require("./subscriber")
-const subscriber = require("./subscriber")
-userSchema = new Schema(
+    { Schema } = require("mongoose"),
+    Subscriber = require("./subscriber"),
+    Course = require("./course"),
+    userSchema = new Schema(
+
     {
         name: {
-            first:{
+            first: {
                 type: String,
-                required:true
+                required: true
             },
-            last:{
+            last: {
                 type: String,
-                required:true
+                required: true
             }
         },
-        email:{
+        email: {
             type: String,
             required: true,
             unique: true
         },
         zipCode: {
             type: Number,
-            min: [10000, "Zip code too short"],
+            min: [10000, "Zip code too short!"],
             max: 99999
         },
         password: {
             type: String,
-            required:true
+            required: true
         },
         courses: [{type: Schema.Types.ObjectId, ref: Course}],
-        subscribedAccount: {type: Schema.Types.ObjectId, ref: Subscriber}
+        subcribedAccount: {type: Schema.Types.ObjectId, ref: Subscriber}
+
     },
     {
-        timestamps:true
+        timestamps: true
     }
-)
 
-userSchema.virtual("fullName".get(function () {
+    )
+
+userSchema.virtual("fullName").get(function () {
     return `${this.name.first} ${this.name.last}`;
-}));
+});
 
-userSchema.pre("save", function(next){
+userSchema.pre("save", function(next) {
     let user = this;
-    if(user.subscribedAccount==undefined){
+    if(user.subcribedAccount == undefined) {
         Subscriber.findOne({
             email: user.email
         })
         .then(subscriber => {
-            user.subscribedAccount = subscriber;
+            user.subcribedAccount = subscriber;
             next();
         })
-        .catch(error =>{
-            console.log(`error in associating subscriber: ${error.message}`);
+        .catch(error => {
+            console.log(`error with subscriber: ${error.message}`);
             next(error);
-        })
+        })   
     }
-    else{
+    else {
         next();
     }
-})
+});
 
-
-module.exports= mongoose.model("User", userSchema);
+module.exports = mongoose.model("User", userSchema);
