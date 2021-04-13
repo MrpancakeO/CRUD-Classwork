@@ -1,5 +1,6 @@
 "use strict";
 
+
 const Course = require("../models/course");
 
 module.exports = {
